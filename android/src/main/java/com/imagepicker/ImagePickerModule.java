@@ -356,7 +356,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       libraryIntent = new Intent(Intent.ACTION_PICK,
       MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-      if (pickBoth) 
+      if (pickBoth)
       {
         libraryIntent.setType("image/* video/*");
       }
@@ -403,7 +403,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       callback = null;
       return;
     }
-
+    boolean isGetRealPath = this.options.hasKey("realPath") && this.options.getBoolean("realPath");
     Uri uri = null;
     switch (requestCode)
     {
@@ -413,7 +413,10 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
       case REQUEST_LAUNCH_IMAGE_LIBRARY:
         uri = data.getData();
-        String realPath = getRealPathFromURI(uri);
+        String realPath =  null;
+        if(isGetRealPath){
+          realPath = getRealPathFromURI(uri);
+        }
         final boolean isUrl = !TextUtils.isEmpty(realPath) &&
                 Patterns.WEB_URL.matcher(realPath).matches();
         if (realPath == null || isUrl)
@@ -439,7 +442,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
       case REQUEST_LAUNCH_VIDEO_LIBRARY:
         responseHelper.putString("uri", data.getData().toString());
-        responseHelper.putString("path", getRealPathFromURI(data.getData()));
+        if(isGetRealPath) {
+          responseHelper.putString("path", getRealPathFromURI(data.getData()));
+        }
         responseHelper.invokeResponse(callback);
         callback = null;
         return;
@@ -447,7 +452,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       case REQUEST_LAUNCH_VIDEO_CAPTURE:
         final String path = getRealPathFromURI(data.getData());
         responseHelper.putString("uri", data.getData().toString());
-        responseHelper.putString("path", path);
+        if(isGetRealPath) {
+          responseHelper.putString("path", path);
+        }
         fileScan(reactContext, path);
         responseHelper.invokeResponse(callback);
         callback = null;
